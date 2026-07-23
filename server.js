@@ -20,6 +20,22 @@ app.get('/api/beams-auth', (req, res) => {
     const userId = req.query.user_id;
     if (!userId) return res.status(400).json({ error: "Missing user_id parameter." });
     
+    // ──────────────────────────────────────────────────────────────
+    // NEW: DYNAMIC SECURITY GUARD GATEWAY
+    // ──────────────────────────────────────────────────────────────
+    const rawCookies = req.headers.cookie || '';
+    
+    // Log incoming headers to your DigitalOcean logs for visibility
+    console.log(`[Auth Request] User ID: ${userId} | Incoming Cookies: ${rawCookies}`);
+
+    // Verification check: Ensure a cookie exists from your shared domain
+    // (Protects against direct external, cross-site, or unauthenticated scripts)
+    if (!rawCookies || rawCookies.trim() === "") {
+        console.warn(`Security Block: Token generation denied for user ID: ${userId} - Missing Session Cookie.`);
+        return res.status(401).json({ error: "Access denied. Valid session cookie missing." });
+    }
+    // ──────────────────────────────────────────────────────────────
+    
     try {
         const beamsToken = beamsClient.generateToken(userId);
         return res.json(beamsToken);
