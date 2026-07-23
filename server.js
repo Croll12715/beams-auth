@@ -28,37 +28,6 @@ app.get('/api/beams-auth', (req, res) => {
     }
 });
 
-/**
- * 2. THE PUBLISHING ENDPOINT (Used by your Jitterbit container or backend database)
- */
-app.post('/api/publish-alert', async (req, res) => {
-    const { userId, title, message, deep_link } = req.body;
-
-    if (!userId || !title || !message) {
-        return res.status(400).json({ error: "Missing userId, title, or message payload variables." });
-    }
-
-    try {
-        // Use the official SDK to push explicitly to the authenticated User ID [Pusher Beams Docs]
-        const publishResponse = await beamsClient.publishToUsers([userId], {
-            web: {
-                notification: {
-                    title: title,
-                    body: message,
-                    deep_link: deep_link
-                }
-            }
-        });
-
-        console.log(`Alert successfully published to user session: ${userId}`, publishResponse);
-        return res.json({ success: true, publishId: publishResponse.publishId });
-
-    } catch (err) {
-        console.error("Pusher cloud delivery block failed:", err);
-        return res.status(500).json({ error: `Pusher delivery crash: ${err.message}` });
-    }
-});
-
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`Unified production authentication & alert publishing engine listening on port ${PORT}`);
 });
