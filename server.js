@@ -19,21 +19,7 @@ const beamsClient = new PushNotifications({
 app.get('/api/beams-auth', (req, res) => {
     const userId = req.query.user_id;
     if (!userId) return res.status(400).json({ error: "Missing user_id parameter." });
-    // ──────────────────────────────────────────────────────────────
-    // NEW: SESSION GUARD GATEWAY
-    // ──────────────────────────────────────────────────────────────
-    // Extract incoming cookies sent automatically by the browser
-    const rawCookies = req.headers.cookie || '';
     
-    // LOOK FOR YOUR JITTERBIT SESSION COOKIE 
-    // (Note: Replace 'AppBuilderSession' below with your actual cookie name if different, e.g., 'connect.sid' or 'JSESSIONID')
-    const hasActiveSession = rawCookies.includes('Vinyl.Session');
-
-    if (!hasActiveSession) {
-        console.warn(`Security Block: Unauthorized token request blocked for user ID: ${userId}`);
-        return res.status(401).json({ error: "Access denied. Valid session cookie missing." });
-    }
-    // ──────────────────────────────────────────────────────────────
     try {
         const beamsToken = beamsClient.generateToken(userId);
         return res.json(beamsToken);
